@@ -1053,6 +1053,19 @@
 
         // 初始化
         init();
+            // 保存为图片
+    function saveAsImage() {
+        const element = document.getElementById('menuPreview');
+        html2canvas(element).then(canvas => {
+            const link = document.createElement('a');
+            link.download = '菜单_' + new Date().getTime() + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
     </script>
 </body>
 </html>
