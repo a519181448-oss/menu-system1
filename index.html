@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>财富食代菜单宝</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; padding: 15px; }
+        .container { max-width: 100%; margin: 0 auto; }
+        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 25px; padding: 25px 20px; background: linear-gradient(135deg, #8B5A2B 0%, #A0522D 100%); border-radius: 16px; color: white; }
+        .logo { width: 90px; height: 90px; margin: 0 auto 15px; display: block; border-radius: 50%; object-fit: contain; background: white; padding: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        h1 { color: white; margin-bottom: 8px; font-size: 28px; font-weight: bold; }
+        .subtitle { font-size: 16px; opacity: 0.9; }
+        h2 { color: #8B5A2B; font-size: 22px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 3px solid #f5e6d0; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; color: #666; font-size: 18px; font-weight: 500; }
+        input, select { width: 100%; padding: 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 18px; background: white; }
+        input:focus, select:focus { outline: none; border-color: #8B5A2B; }
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn-primary { background: linear-gradient(135deg, #8B5A2B 0%, #A0522D 100%); color: white; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary { background: #f5e6d0; color: #8B5A2B; border: 1px solid #8B5A2B; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .dish-list { max-height: 450px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px; }
+        .dish-item { display: flex; align-items: center; padding: 18px; margin: 8px 0; background: #f8f9fa; border-radius: 10px; cursor: pointer; border: 2px solid transparent; }
+        .dish-item:active { transform: scale(0.98); }
+        .dish-item.selected { background: #8B5A2B; color: white; border-color: #6d4623; }
+        .dish-info { flex: 1; }
+        .dish-name { font-weight: bold; font-size: 20px; }
+        .dish-desc { font-size: 16px; color: #999; margin-top: 4px; }
+        .dish-item.selected .dish-desc { color: rgba(255,255,255,0.8); }
+        .hidden { display: none; }
+        .price-input { width: 100px; padding: 10px; text-align: right; font-size: 22px; }
+        .history-item { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #8B5A2B; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .history-title { font-weight: bold; font-size: 18px; color: #8B5A2B; }
+        .history-time { font-size: 14px; color: #999; }
+        .history-details { font-size: 16px; color: #666; margin-bottom: 10px; }
+        .history-actions { display: flex; gap: 10px; }
+        .history-actions button { flex: 1; padding: 10px; font-size: 16px; }
+        
+        /* A4纸菜单样式 */
+        .a4-menu {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 20mm;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            font-family: 'STKaiti', 'KaiTi', serif;
+            position: relative;
+        }
+        
+        .a4-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #d4b896;
+        }
+        
+        .a4-title {
+            font-size: 42px;
+            color: #8B5A2B;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .a4-info {
+            font-size: 20px;
+            color: #666;
+            margin: 8px 0;
+        }
+        
+        .a4-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+        
+        .a4-table th {
+            background: #8B5A2B;
+            color: white;
+            padding: 18px 15px;
+            font-size: 22px;
+            text-align: left;
+        }
+        
+        .a4-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 22px;
+        }
+        
+        .a4-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .a4-price {
+            text-align: right;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .a4-footer {
+            text-align: right;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #d4b896;
+        }
+        
+        .a4-total {
+            font-size: 32px;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        
+        .a4-note {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 20px;
+            color: #999;
+        }
+        
+        .a4-price-input {
+            width: 120px;
+            padding: 12px;
+            text-align: right;
+            font-size: 22px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        /* 图片预览样式 */
+        .image-preview {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logo.png" alt="财富食代Logo" class="logo">
+            <h1>财富食代菜单宝</h1>
+            <p class="subtitle">专业餐饮管理助手</p>
+        </div>
+
+        <!-- 菜品库管理 -->
+        <div class="card" id="dishManagement">
+            <h2>📚 菜品库管理</h2>
+            <div class="form-group">
+                <label>菜名</label>
+                <input type="text" id="dishName" placeholder="输入菜名">
+            </div>
+            <div class="form-group">
+                <label>分类</label>
+                <select id="dishCategory">
+                    <option value="热菜">热菜</option>
+                    <option value="凉菜">凉菜</option>
+                    <option value="汤品">汤品</option>
+                    <option value="主食">主食</option>
+                    <option value="饮品">饮品</option>
+                    <option value="甜点">甜点</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>描述（可选）</label>
+                <input type="text" id="dishDesc" placeholder="输入菜品描述">
+            </div>
+            <button class="btn btn-primary" onclick="addDish()">➕ 添加菜品</button>
+            <button class="btn btn-danger" onclick="clearAllDishes()">🗑️ 清空所有菜品</button>
+        </div>
+
+        <!-- 选择菜品 -->
+        <div class="card" id="dishSelection">
+            <h2>📝 选择菜品</h2>
+            <div class="dish-list" id="dishList"></div>
+            <p id="selectedCount" style="margin-top: 15px; font-size: 18px; color: #666;">已选：0 道菜</p>
+            <button class="btn btn-secondary" onclick="clearSelection()">清空选择</button>
+            <button class="btn btn-primary" onclick="showBookingInfo()">下一步：预订信息</button>
+        </div>
+
+        <!-- 预订信息 -->
+        <div class="card hidden" id="bookingInfo">
+            <h2>📅 预订信息</h2>
+            <div class="form-group">
+                <label>预订时间</label>
+                <input type="text" id="bookTime" placeholder="例如：今天晚上、明天中午">
+            </div>
+            <div class="form-group">
+                <label>预订包厢</label>
+                <select id="bookRoom">
+                    <option value="">请选择包厢</option>
+                    <option value="一帆风顺">一帆风顺</option>
+                    <option value="二龙腾飞">二龙腾飞</option>
+                    <option value="三星高照">三星高照</option>
+                    <option value="五福临门">五福临门</option>
+                    <option value="六六大顺">六六大顺</option>
+                    <option value="八方来财">八方来财</option>
+                    <option value="九九归一">九九归一</option>
+                    <option value="十全十美">十全十美</option>
+                    <option value="临时补开">临时补开</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>预订人</label>
+                <input type="text" id="bookName" placeholder="输入预订人姓名">
+            </div>
+            <div class="form-group">
+                <label>联系电话</label>
+                <input type="tel" id="bookPhone" placeholder="输入联系电话">
+            </div>
+            <button class="btn btn-secondary" onclick="hideBookingInfo()">返回修改菜品</button>
+            <button class="btn btn-primary" onclick="generateMenu()">生成菜单</button>
+        </div>
+
+        <!-- A4纸菜单预览 -->
+        <div class="card hidden" id="menuPreview">
+            <h2>📋 桌菜单</h2>
+            <div class="a4-menu" id="menuContent"></div>
+            <button class="btn btn-success" onclick="saveMenu()">💾 保存菜单</button>
+            <button class="btn btn-primary" onclick="generateImage()">📸 生成图片</button>
+            <button class="btn btn-danger" onclick="clearOrder()">🗑️ 清空订单</button>
+        </div>
+
+        <!-- 图片预览 -->
+        <div class="card hidden" id="imagePreview">
+            <h2>🖼️ 菜单图片</h2>
+            <div id="imageContainer"></div>
+            <button class="btn btn-secondary" onclick="hideImagePreview()">返回修改</button>
+            <button class="btn btn-success" onclick="downloadImage()">💾 保存到相册</button>
+        </div>
+
+        <!-- 历史菜单 -->
+        <div class="card" id="historySection">
+            <h2>📜 历史菜单</h2>
+            <div id="historyList"></div>
+            <button class="btn btn-secondary" onclick="clearAllHistory()">🗑️ 清空所有历史</button>
+        </div>
+    </div>
+
+    <script>
+        let dishes = JSON.parse(localStorage.getItem('menuDishes')) || [];
+        let selectedDishes = [];
+        let historyMenus = JSON.parse(localStorage.getItem('menuHistory')) || [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDishList();
+            renderHistoryList();
+        });
+
+        function addDish() {
+            const name = document.getElementById('dishName').value.trim();
+            const category = document.getElementById('dishCategory').value;
+            const desc = document.getElementById('dishDesc').value.trim();
+
+            if (!name) { alert('请输入菜名'); return; }
+
+            dishes.push({ id: Date.now(), name: name, category: category, description: desc });
+            localStorage.setItem('menuDishes', JSON.stringify(dishes));
+
+            document.getElementById('dishName').value = '';
+            document.getElementById('dishDesc').value = '';
+            alert('菜品添加成功！');
+            renderDishList();
+        }
+
+        function clearAllDishes() {
+            if (confirm('确定要清空所有菜品吗？')) {
+                dishes = [];
+                localStorage.setItem('menuDishes', JSON.stringify(dishes));
+                renderDishList();
+            }
+        }
+
+        function renderDishList() {
+            const dishList = document.getElementById('dishList');
+            dishList.innerHTML = '';
+
+            if (dishes.length === 0) {
+                dishList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无菜品，请先添加菜品</p>';
+                return;
+            }
+
+            dishes.forEach(dish => {
+                const isSelected = selectedDishes.some(d => d.id === dish.id);
+                const div = document.createElement('div');
+                div.className = 'dish-item' + (isSelected ? ' selected' : '');
+                div.innerHTML = '<div class="dish-info"><div class="dish-name">' + dish.name + '</div><div class="dish-desc">' + dish.category + (dish.description ? ' - ' + dish.description : '') + '</div></div>';
+                div.onclick = function() { toggleDish(dish); };
+                dishList.appendChild(div);
+            });
+
+            document.getElementById('selectedCount').textContent = '已选：' + selectedDishes.length + ' 道菜';
+        }
+
+        function toggleDish(dish) {
+            const index = selectedDishes.findIndex(d => d.id === dish.id);
+            if (index > -1) {
+                selectedDishes.splice(index, 1);
+            } else {
+                selectedDishes.push(dish);
+            }
+            renderDishList();
+        }
+
+        function clearSelection() { selectedDishes = []; renderDishList(); }
+
+        function showBookingInfo() {
+            if (selectedDishes.length === 0) { alert('请至少选择一道菜品'); return; }
+            document.getElementById('dishManagement').classList.add('hidden');
+            document.getElementById('dishSelection').classList.add('hidden');
+            document.getElementById('bookingInfo').classList.remove('hidden');
+        }
+
+        function hideBookingInfo() {
+            document.getElementById('bookingInfo').classList.add('hidden');
+            document.getElementById('dishManagement').classList.remove('hidden');
+            document.getElementById('dishSelection').classList.remove('hidden');
+        }
+
+        function generateMenu() {
+            const time = document.getElementById('bookTime').value.trim();
+            const room = document.getElementById('bookRoom').value;
+            const name = document.getElementById('bookName').value.trim();
+            const phone = document.getElementById('bookPhone').value.trim();
+
+            if (!time || !room || !name || !phone) { alert('请填写完整的预订信息'); return; }
+
+            let html = '<div class="a4-header"><div class="a4-title">财富食代</div>';
+            html += '<div class="a4-info">预订时间：' + time + '</div>';
+            html += '<div class="a4-info">预订包厢：' + room + '</div>';
+            html += '<div class="a4-info">预订人：' + name + '</div>';
+            html += '<div class="a4-info">联系电话：' + phone + '</div></div>';
+            
+            html += '<table class="a4-table"><thead><tr><th>序号</th><th>菜名</th><th>分类</th><th>价格</th></tr></thead><tbody>';
+
+            selectedDishes.forEach(function(dish, index) {
+                if (!dish.price) dish.price = 0;
+                html += '<tr><td>' + (index + 1) + '</td><td>' + dish.name + '</td><td>' + dish.category + '</td><td class="a4-price"><input type="number" class="a4-price-input" value="' + dish.price + '" onchange="updateDishPrice(' + dish.id + ', this.value)" placeholder="输入价格" min="0" step="0.01"></td></tr>';
+            });
+
+            let totalPrice = 0;
+            selectedDishes.forEach(dish => { totalPrice += parseFloat(dish.price) || 0; });
+
+            html += '</tbody></table>';
+            html += '<div class="a4-footer"><p>共计：' + selectedDishes.length + ' 道菜</p><p class="a4-total">总计：¥' + totalPrice.toFixed(2) + '</p></div>';
+            html += '<div class="a4-note"><p>感谢您的光临，祝您用餐愉快！</p></div>';
+
+            document.getElementById('menuContent').innerHTML = html;
+            document.getElementById('bookingInfo').classList.add('hidden');
+            document.getElementById('menuPreview').classList.remove('hidden');
+        }
+
+        function updateDishPrice(dishId, price) {
+            const dish = selectedDishes.find(d => d.id === dishId);
+            if (dish) {
+                dish.price = parseFloat(price) || 0;
+                let totalPrice = 0;
+                selectedDishes.forEach(d => { totalPrice += parseFloat(d.price) || 0; });
+                const totalElement = document.querySelector('.a4-total');
+                if (totalElement) totalElement.textContent = '总计：¥' + totalPrice.toFixed(2);
+            }
+        }
+
+        function saveMenu() {
+            const time = document.getElementById('bookTime').value.trim();
+            const room = document.getElementById('bookRoom').value;
+            const name = document.getElementById('bookName').value.trim();
+            const phone = document.getElementById('bookPhone').value.trim();
+            let totalPrice = 0;
+            selectedDishes.forEach(dish => { totalPrice += parseFloat(dish.price) || 0; });
+
+            historyMenus.unshift({
+                id: Date.now(), time: time, room: room, name: name, phone: phone,
+                dishes: JSON.parse(JSON.stringify(selectedDishes)), totalPrice: totalPrice,
+                savedAt: new Date().toLocaleString()
+            });
+            localStorage.setItem('menuHistory', JSON.stringify(historyMenus));
+            renderHistoryList();
+            alert('菜单已保存到历史记录！');
+        }
+
+        function renderHistoryList() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+
+            if (historyMenus.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无历史菜单</p>';
+                return;
+            }
+
+            historyMenus.forEach(function(item) {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = '<div class="history-header"><div class="history-title">' + item.room + ' - ' + item.name + '</div><div class="history-time">' + item.savedAt + '</div></div><div class="history-details"><p>预订时间：' + item.time + '</p><p>联系电话：' + item.phone + '</p><p>菜品数量：' + item.dishes.length + ' 道</p><p>总金额：¥' + item.totalPrice.toFixed(2) + '</p></div><div class="history-actions"><button class="btn btn-secondary" onclick="viewHistoryMenu(' + item.id + ')">👁️ 查看</button><button class="btn btn-primary" onclick="editHistoryMenu(' + item.id + ')">✏️ 编辑</button><button class="btn btn-danger" onclick="deleteHistoryMenu(' + item.id + ')">🗑️ 删除</button></div>';
+                historyList.appendChild(div);
+            });
+        }
+
+        function viewHistoryMenu(id) {
+            const item = historyMenus.find(h => h.id === id);
+            if (!item) return;
+            selectedDishes = JSON.parse(JSON.stringify(item.dishes));
+            document.getElementById('bookTime').value = item.time;
+            document.getElementById('bookRoom').value = item.room;
+            document.getElementById('bookName').value = item.name;
+            document.getElementById('bookPhone').value = item.phone;
+            generateMenu();
+        }
+
+        function editHistoryMenu(id) {
+            const item = historyMenus.find(h => h.id === id);
+            if (!item) return;
+            selectedDishes = JSON.parse(JSON.stringify(item.dishes));
+            document.getElementById('bookTime').value = item.time;
+            document.getElementById('bookRoom').value = item.room;
+            document.getElementById('bookName').value = item.name;
+            document.getElementById('bookPhone').value = item.phone;
+            document.getElementById('dishManagement').classList.add('hidden');
+            document.getElementById('dishSelection').classList.add('hidden');
+            document.getElementById('menuPreview').classList.add('hidden');
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('bookingInfo').classList.remove('hidden');
+            renderDishList();
+        }
+
+        function deleteHistoryMenu(id) {
+            if (confirm('确定要删除这个历史菜单吗？')) {
+                historyMenus = historyMenus.filter(h => h.id !== id);
+                localStorage.setItem('menuHistory', JSON.stringify(historyMenus));
+                renderHistoryList();
+            }
+        }
+
+        function clearAllHistory() {
+            if (confirm('确定要清空所有历史菜单吗？')) {
+                historyMenus = [];
+                localStorage.setItem('menuHistory', JSON.stringify(historyMenus));
+                renderHistoryList();
+            }
+        }
+
+        function generateImage() {
+            const menuElement = document.getElementById('menuContent');
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(menuElement, { backgroundColor: '#ffffff', scale: 2 }).then(function(canvas) {
+                    const imageData = canvas.toDataURL('image/png');
+                    document.getElementById('imageContainer').innerHTML = '<img src="' + imageData + '" class="image-preview" alt="菜单图片" style="max-width: 100%; height: auto;">';
+                    document.getElementById('menuPreview').classList.add('hidden');
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                });
+            } else {
+                alert('图片生成功能加载中，请稍后重试');
+            }
+        }
+
+        function hideImagePreview() {
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('menuPreview').classList.remove('hidden');
+        }
+
+        // 保存到相册
+        function downloadImage() {
+            const img = document.querySelector('#imageContainer img');
+            if (!img) { alert('没有图片'); return; }
+            
+            // 尝试用系统分享
+            if (navigator.share) {
+                fetch(img.src)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], '菜单.png', { type: 'image/png' });
+                        navigator.share({
+                            files: [file],
+                            title: '财富食代菜单'
+                        }).catch(() => {
+                            forceDownload(img.src);
+                        });
+                    });
+            } else {
+                forceDownload(img.src);
+            }
+        }
+        
+        function forceDownload(dataUrl) {
+            const link = document.createElement('a');
+            link.download = '菜单_' + Date.now() + '.png';
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('如果图片没有保存，请长按图片手动保存');
+        }
+
+        function clearOrder() {
+            if (confirm('确定要清空当前订单吗？')) {
+                document.getElementById('menuContent').innerHTML = '';
+                document.getElementById('menuPreview').classList.add('hidden');
+                document.getElementById('dishManagement').classList.remove('hidden');
+                document.getElementById('dishSelection').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
