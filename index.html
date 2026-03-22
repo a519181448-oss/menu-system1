@@ -80,23 +80,6 @@
             z-index: 1;
         }
 
-        .logo-placeholder {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #8B5A2B;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 1;
-        }
-
         h1 {
             color: white;
             margin-bottom: 8px;
@@ -250,65 +233,6 @@
             margin-top: 15px;
         }
 
-        .menu-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .menu-table-name {
-            font-size: 26px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .menu-info {
-            font-size: 16px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .menu-dishes {
-            margin-top: 20px;
-        }
-
-        .menu-category {
-            margin-bottom: 15px;
-        }
-
-        .menu-category-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #8B5A2B;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #f5e6d0;
-        }
-
-        .menu-dish-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dashed #e0e0e0;
-        }
-
-        .menu-dish-name {
-            font-size: 18px;
-            color: #333;
-        }
-
-        .menu-dish-desc {
-            font-size: 14px;
-            color: #999;
-            margin-top: 3px;
-        }
-
-        .menu-footer {
-            text-align: right;
-            margin-top: 20px;
-            font-size: 16px;
-            color: #666;
-        }
-
         .stats {
             display: flex;
             justify-content: space-around;
@@ -356,7 +280,7 @@
 
         .step.active {
             background: #8B5A2B;
-            color: steps: [1, 2, 3, 4];
+            color: white;
         }
 
         .step.completed {
@@ -372,38 +296,6 @@
             font-size: 14px;
         }
 
-        /* PWA 安装提示 */
-        .install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 1000;
-        }
-
-        .install-prompt-text {
-            font-size: 16px;
-            color: #333;
-        }
-
-        .install-prompt-btn {
-            background: #8B5A2B;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
         @media print {
             body {
                 background: white;
@@ -413,7 +305,7 @@
                 box-shadow: none;
                 border: 1px solid #ddd;
             }
-            .btn, .step-indicator, .footer, .install-prompt {
+            .btn, .step-indicator, .footer {
                 display: none;
             }
         }
@@ -447,6 +339,7 @@
                     <option value="热菜">热菜</option>
                     <option value="凉菜">凉菜</option>
                     <option value="汤品">汤品</option>
+option>
                     <option value="主食">主食</option>
                     <option value="饮品">饮品</option>
                     <option value="甜点">甜点</option>
@@ -499,7 +392,7 @@
             </div>
             <div class="form-group">
                 <label>联系电话</label>
-                <input type="tel" id="bookPhone" placeholder="输入联系电话">
+                <input type="text" id="bookPhone" placeholder="输入联系电话">
             </div>
             <button class="btn btn-secondary" onclick="showStep(2)">返回修改菜品</button>
             <button class="btn btn-primary" onclick="generateMenu()">生成菜单</button>
@@ -542,60 +435,27 @@
         </div>
     </div>
 
-    <!-- PWA 安装提示 -->
-    <div class="install-prompt hidden" id="installPrompt">
-        <div class="install-prompt-text">添加到主屏幕，体验更佳</div>
-        <button class="install-prompt-btn" onclick="installPWA()">添加</button>
-    </div>
-
     <script>
         // 数据存储
         let dishes = JSON.parse(localStorage.getItem('menuDishes')) || [];
         let selectedDishes = [];
         let orders = JSON.parse(localStorage.getItem('menuOrders')) || [];
-        let deferredPrompt;
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             renderDishList();
             updateStats();
-            checkPWAInstall();
         });
-
-        // PWA 安装
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installPrompt').classList.remove('hidden');
-        });
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((result) => {
-                    if (result.outcome === 'accepted') {
-                        console.log('PWA installed');
-                    }
-                    deferredPrompt = null;
-                    document.getElementById('installPrompt').classList.add('hidden');
-                });
-            }
-        }
-
-        function checkPWAInstall() {
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('installPrompt').classList.add('hidden');
-            }
-        }
 
         // 步骤控制
         function showStep(step) {
             document.querySelectorAll('.card').forEach(card => {
-                if (card.id.startsWith('step')) {
+                if (card.id && card.id.startsWith('step')) {
                     card.classList.add('hidden');
                 }
             });
-            document.getElementById('step' + step).classList.remove('hidden');
+            const target = document.getElementById('step' + step);
+            if (target) target.classList.remove('hidden');
 
             document.querySelectorAll('.step').forEach(stepEl => {
                 stepEl.classList.remove('active');
@@ -650,6 +510,8 @@
         // 渲染菜品列表
         function renderDishList() {
             const dishList = document.getElementById('dishList');
+            if (!dishList) return;
+            
             dishList.innerHTML = '';
 
             if (dishes.length === 0) {
@@ -660,18 +522,13 @@
             dishes.forEach(dish => {
                 const isSelected = selectedDishes.some(d => d.id === dish.id);
                 const div = document.createElement('div');
-                div.className = `dish-item ${isSelected ? 'selected' : ''}`;
-                div.innerHTML = `
-                    <div class="dish-info">
-                        <div class="dish-name">${dish.name}</div>
-                        <div class="dish-desc">${dish.category} ${dish.description ? '- ' + dish.description : ''}</div>
-                    </div>
-                `;
-                div.onclick = () => toggleDish(dish);
+                div.className = 'dish-item' + (isSelected ? ' selected' : '');
+                div.innerHTML = '<div class="dish-info"><div class="dish-name">' + dish.name + '</div><div class="dish-desc">' + dish.category + (dish.description ? ' - ' + dish.description : '') + '</div></div>';
+                div.onclick = function() { toggleDish(dish); };
                 dishList.appendChild(div);
             });
 
-            document.getElementById('selectedCount').textContent = `已选：${selectedDishes.length} 道菜`;
+            document.getElementById('selectedCount').textContent = '已选：' + selectedDishes.length + ' 道菜';
         }
 
         // 选择/取消选择菜品
@@ -695,8 +552,8 @@
         function generateMenu() {
             const time = document.getElementById('bookTime').value;
             const room = document.getElementById('bookRoom').value;
-            const name = document.getElementById('bookName').value;
-            const phone = document.getElementById('bookPhone').value;
+            const name = document.getElementById('bookName').value.trim();
+            const phone = document.getElementById('bookPhone').value.trim();
             
             if (!time || !room || !name || !phone) {
                 alert('请填写完整的预订信息');
@@ -709,44 +566,32 @@
             }
             
             const menuContent = document.getElementById('menuContent');
-            let html = `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2>财富食代</h2>
-                    <p>预订时间：${time}</p>
-                    <p>预订包厢：${room}</p>
-                    <p>预订人：${name}</p>
-                    <p>联系电话：${phone}</p>
-                </div>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="background: #f5f5f5;">
-                            <th style="border: 1px solid #ddd; padding: 10px;">序号</th>
-                            <th style="border: 1px solid #ddd; padding: 10px;">菜名</th>
-                            <th style="border: 1px solid #ddd; padding: 10px;">分类</th>
-                            <th style="border: 1px solid #ddd; padding: 10px;">描述</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let html = '<div style="text-align: center; margin-bottom: 20px;">';
+            html += '<h2 style="color: #8B5A2B;">财富食代</h2>';
+            html += '<p>预订时间：' + time + '</p>';
+            html += '<p>预订包厢：' + room + '</p>';
+            html += '<p>预订人：' + name + '</p>';
+            html += '<p>联系电话：' + phone + '</p>';
+            html += '</div>';
+            html += '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="background: #f5f5f5;">';
+            html += '<th style="border: 1px solid #ddd; padding: 10px;">序号</th>';
+            html += '<th style="border: 1px solid #ddd; padding: 10px;">菜名</th>';
+            html += '<th style="border: 1px solid #ddd; padding: 10px;">分类</th>';
+            html += '<th style="border: 1px solid #ddd; padding: 10px;">描述</th>';
+            html += '</tr></thead><tbody>';
             
-            selectedDishes.forEach((dish, index) => {
-                html += `
-                    <tr>
-                        <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${index + 1}</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${dish.name}</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${dish.category}</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${dish.description || '-'}</td>
-                    </tr>
-                `;
+            selectedDishes.forEach(function(dish, index) {
+                html += '<tr>';
+                html += '<td style="border: 1px solid #ddd; padding: 10px; text-align: center;">' + (index + 1) + '</td>';
+                html += '<td style="border: 1px solid #ddd; padding: 10px;">' + dish.name + '</td>';
+                html += '<td style="border: 1px solid #ddd; padding: 10px;">' + dish.category + '</td>';
+                html += '<td style="border: 1px solid #ddd; padding: 10px;">' + (dish.description || '-') + '</td>';
+                html += '</tr>';
             });
             
-            html += `
-                    </tbody>
-                </table>
-                <div style="text-align: right; margin-top: 20px;">
-                    <p>共计：${selectedDishes.length} 道菜</p>
-                </div>
-            `;
+            html += '</tbody></table>';
+            html += '<div style="text-align: right; margin-top: 20px;"><p>共计：' + selectedDishes.length + ' 道菜</p></div>';
             
             menuContent.innerHTML = html;
             
@@ -756,7 +601,7 @@
                 room: room,
                 name: name,
                 phone: phone,
-                dishes: selectedDishes,
+                dishes: selectedDishes.slice(),
                 timestamp: new Date().getTime()
             };
             
@@ -771,12 +616,16 @@
         // 保存为图片
         function saveAsImage() {
             const element = document.getElementById('menuPreview');
-            html2canvas(element).then(canvas => {
-                const link = document.createElement('a');
-                link.download = '菜单_' + new Date().getTime() + '.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(element).then(function(canvas) {
+                    const link = document.createElement('a');
+                    link.download = '菜单_' + new Date().getTime() + '.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            } else {
+                alert('图片生成库未加载，请稍后重试');
+            }
         }
 
         // 清空订单
@@ -792,20 +641,11 @@
             document.getElementById('totalOrders').textContent = orders.length;
             
             let totalDishes = 0;
-            orders.forEach(order => {
+            orders.forEach(function(order) {
                 totalDishes += order.dishes.length;
             });
             document.getElementById('totalDishes').textContent = totalDishes;
-            
-            // 预计收入（示例，实际应根据菜品价格计算）
             document.getElementById('totalIncome').textContent = '0';
-        }
-
-        // 注册 Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(registration => console.log('SW registered'))
-                .catch(error => console.log('SW registration failed'));
         }
     </script>
 </body>
